@@ -15,14 +15,13 @@ const app = express();
 // ===============================
 app.use(
   cors({
-    origin: [
-      "https://restaurant-booking-frontend-5idx.onrender.com",
-      "http://localhost:5173"
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.options("*", cors());
 app.use(express.json());
 
 // ===============================
