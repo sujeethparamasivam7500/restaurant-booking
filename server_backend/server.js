@@ -1,37 +1,47 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import dotenv from "dotenv";
 
-import authRoutes from "./routes/auth.js";        // Register + Login Routes
-import bookingRoutes from "./routes/booking.js";  // Booking Routes
+import authRoutes from "./routes/auth.js";
+import bookingRoutes from "./routes/booking.js";
+
+dotenv.config();
 
 const app = express();
 
-// ============================
-// 🔥 Middlewares
-// ============================
+// ===============================
+// Middlewares
+// ===============================
 app.use(cors());
 app.use(express.json());
 
-// ============================
-// 🔥 MongoDB Connection (Atlas)
-// ============================
+// ===============================
+// MongoDB Connection
+// ===============================
 mongoose
-  .connect(
-    "mongodb+srv://sujeethparamasivam_db_user:sujeeth7500@table.irsiw2i.mongodb.net/restaurant_booking"
-  )
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Atlas Connected"))
-  .catch((err) => console.error("❌ MongoDB Error:", err));
+  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
-// ============================
-// 🔥 API Routes
-// ============================
-app.use("/api", authRoutes);            // → /api/register, /api/login
-app.use("/api/booking", bookingRoutes); // → /api/booking/create, /api/booking/availability
+// ===============================
+// Routes
+// ===============================
+app.use("/api", authRoutes);
+app.use("/api/booking", bookingRoutes);
 
-// ============================
-// 🔥 Start Server
-// ============================
-app.listen(5000, () => {
-  console.log("🚀 Server running on port 5000");
+// ===============================
+// Default Route
+// ===============================
+app.get("/", (req, res) => {
+  res.send("Restaurant Booking Backend is Running...");
+});
+
+// ===============================
+// Start Server
+// ===============================
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
