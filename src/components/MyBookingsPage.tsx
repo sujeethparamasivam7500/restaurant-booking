@@ -1,45 +1,65 @@
 import { useEffect, useState } from "react";
-import { Calendar, Clock, Users, LogOutIcon, XCircle, Home } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Users,
+  LogOutIcon,
+  XCircle,
+  Home,
+} from "lucide-react";
 
 interface MyBookingsPageProps {
   onNavigate: (page: string) => void;
 }
 
-export default function MyBookingsPage({ onNavigate }: MyBookingsPageProps) {
+export default function MyBookingsPage({
+  onNavigate,
+}: MyBookingsPageProps) {
   const [bookings, setBookings] = useState<any[]>([]);
+
+  const API_URL =
+    "https://restaurant-booking-backend-1nmh.onrender.com";
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   useEffect(() => {
     if (!user.email) return;
 
-    fetch(`http://localhost:5000/api/booking/mybookings?email=${user.email}`)
+    fetch(`${API_URL}/api/booking/mybookings?email=${user.email}`)
       .then((res) => res.json())
-      .then((data) => setBookings(data));
+      .then((data) => setBookings(data))
+      .catch((err) => console.error(err));
   }, []);
 
-  // CANCEL BOOKING FUNCTION
   const cancelBooking = async (id: string) => {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
-
-    const res = await fetch(`http://localhost:5000/api/booking/cancel/${id}`, {
-      method: "DELETE",
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message);
+    if (!window.confirm("Are you sure you want to cancel this booking?"))
       return;
-    }
 
-    setBookings((prev) => prev.filter((b) => b._id !== id));
-    alert("Booking cancelled successfully!");
+    try {
+      const res = await fetch(
+        `${API_URL}/api/booking/cancel/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message);
+        return;
+      }
+
+      setBookings((prev) => prev.filter((b) => b._id !== id));
+      alert("Booking cancelled successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 relative">
-
       {/* HOME BUTTON */}
       <div className="absolute top-5 right-36">
         <button
@@ -64,12 +84,16 @@ export default function MyBookingsPage({ onNavigate }: MyBookingsPageProps) {
         </button>
       </div>
 
-      <h1 className="text-4xl font-bold text-gray-800 mb-8">My Bookings</h1>
+      <h1 className="text-4xl font-bold text-gray-800 mb-8">
+        My Bookings
+      </h1>
 
-      {/* NO BOOKINGS */}
       {bookings.length === 0 && (
         <div className="text-center mt-20">
-          <p className="text-gray-500 text-xl mb-4">No bookings found</p>
+          <p className="text-gray-500 text-xl mb-4">
+            No bookings found
+          </p>
+
           <button
             onClick={() => onNavigate("restaurants")}
             className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold"
@@ -79,14 +103,15 @@ export default function MyBookingsPage({ onNavigate }: MyBookingsPageProps) {
         </div>
       )}
 
-      {/* BOOKING CARDS */}
       <div className="flex flex-col gap-6 max-w-3xl">
         {bookings.map((b) => (
           <div
             key={b._id}
             className="bg-white shadow-md rounded-xl p-6 border border-gray-200"
           >
-            <h2 className="text-xl font-bold mb-4">Table {b.tableNumber}</h2>
+            <h2 className="text-xl font-bold mb-4">
+              Table {b.tableNumber}
+            </h2>
 
             <div className="flex items-center gap-3 text-gray-700 mb-2">
               <Calendar size={18} />
