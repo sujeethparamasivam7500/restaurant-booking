@@ -1,20 +1,27 @@
 import { useState } from "react";
 import { CreditCard, Smartphone } from "lucide-react";
 
-export default function PaymentPage({ bookingData, onPaymentSuccess, onNavigate }: any) {
+export default function PaymentPage({
+  bookingData,
+  onPaymentSuccess,
+  onNavigate,
+}: any) {
   const [method, setMethod] = useState("card");
   const [loading, setLoading] = useState(false);
+
+  const API_URL = "https://restaurant-booking-backend-1nmh.onrender.com";
 
   const handlePayment = async () => {
     setLoading(true);
 
-    setTimeout(async () => {
-      // -----------------------------
-      // SAVE BOOKING TO MONGODB
-      // -----------------------------
-      await fetch("http://localhost:5000/api/booking/create", {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      const response = await fetch(`${API_URL}/api/booking/create`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           restaurantId: bookingData.restaurantId,
           tableId: bookingData.tableId,
@@ -24,20 +31,29 @@ export default function PaymentPage({ bookingData, onPaymentSuccess, onNavigate 
           endTime: bookingData.endTime,
           customerName: bookingData.customerName,
           customerEmail: bookingData.customerEmail,
-          customerPhone: bookingData.customerPhone
+          customerPhone: bookingData.customerPhone,
         }),
       });
 
-      setLoading(false);
+      const data = await response.json();
 
-      // Go to confirmation page
+      if (!response.ok) {
+        alert(data.message || "Booking failed");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
       onPaymentSuccess();
-    }, 2000);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+      alert("Server error");
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center px-4">
-
       {/* LOGOUT */}
       <div className="absolute top-5 right-5">
         <button
@@ -49,17 +65,19 @@ export default function PaymentPage({ bookingData, onPaymentSuccess, onNavigate 
       </div>
 
       <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
-
         <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
           Payment
         </h2>
 
         {/* BOOKING SUMMARY */}
         <div className="mb-6 space-y-2">
-          <p className="font-semibold">Restaurant: {bookingData.restaurantName}</p>
+          <p className="font-semibold">
+            Restaurant: {bookingData.restaurantName}
+          </p>
           <p>Date: {bookingData.date}</p>
           <p>Time: {bookingData.time}</p>
           <p>Table: {bookingData.tableNumber}</p>
+
           <p className="font-bold text-orange-600 text-lg">
             Amount: ₹200 (Table Reservation Fee)
           </p>
@@ -70,7 +88,6 @@ export default function PaymentPage({ bookingData, onPaymentSuccess, onNavigate 
           <h3 className="font-semibold mb-2">Select Payment Method</h3>
 
           <div className="space-y-3">
-
             <label className="flex items-center gap-3 border p-3 rounded-lg cursor-pointer">
               <input
                 type="radio"
@@ -90,7 +107,6 @@ export default function PaymentPage({ bookingData, onPaymentSuccess, onNavigate 
               <Smartphone />
               UPI Payment
             </label>
-
           </div>
         </div>
 
@@ -103,11 +119,13 @@ export default function PaymentPage({ bookingData, onPaymentSuccess, onNavigate 
                 placeholder="Card Number"
                 className="w-full border p-2 rounded-lg"
               />
+
               <input
                 type="text"
                 placeholder="MM/YY"
                 className="w-full border p-2 rounded-lg"
               />
+
               <input
                 type="text"
                 placeholder="CVV"
@@ -129,7 +147,7 @@ export default function PaymentPage({ bookingData, onPaymentSuccess, onNavigate 
         <button
           onClick={handlePayment}
           disabled={loading}
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-bold transform transition"
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-bold transition"
         >
           {loading ? "Processing..." : "Pay ₹200"}
         </button>
@@ -140,4 +158,4 @@ export default function PaymentPage({ bookingData, onPaymentSuccess, onNavigate 
       </div>
     </div>
   );
-}
+  }
