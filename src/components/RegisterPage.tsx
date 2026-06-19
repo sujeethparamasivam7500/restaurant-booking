@@ -1,10 +1,16 @@
 import { useState } from "react";
 
-export default function RegisterPage({ onNavigate }: { onNavigate: (page: string) => void }) {
+export default function RegisterPage({
+  onNavigate,
+}: {
+  onNavigate: (page: string) => void;
+}) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+
+  const API_URL = "https://restaurant-booking-backend-1nmh.onrender.com";
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,21 +21,30 @@ export default function RegisterPage({ onNavigate }: { onNavigate: (page: string
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/register", {
+      const response = await fetch(`${API_URL}/api/register`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         setMessage("Registration successful!");
-        setTimeout(() => onNavigate("login"), 1000);
+        setTimeout(() => {
+          onNavigate("login");
+        }, 1000);
       } else {
-        setMessage(data.message);
+        setMessage(data.message || "Registration failed");
       }
     } catch (error) {
+      console.error(error);
       setMessage("Server error");
     }
   };
@@ -86,7 +101,9 @@ export default function RegisterPage({ onNavigate }: { onNavigate: (page: string
         </p>
 
         {message && (
-          <p className="text-center text-sm text-red-600 mt-2">{message}</p>
+          <p className="text-center text-sm text-red-600 mt-2">
+            {message}
+          </p>
         )}
       </form>
     </div>
