@@ -79,9 +79,11 @@ export default function BookingPage({ restaurantId, onNavigate }: BookingPagePro
       return;
     }
 
-    fetch(
-      `http://localhost:5000/api/bookings/availability?restaurantId=${restaurantId}&date=${selectedDate}&time=${selectedTime}`
-    )
+  const API_URL = "https://restaurant-booking-backend-1nmh.onrender.com";
+
+fetch(
+  `${API_URL}/api/booking/availability?restaurantId=${restaurantId}&date=${selectedDate}&time=${selectedTime}`
+)
       .then((res) => res.json())
       .then((data) => {
         const ids = data.map((b: any) => b.tableId);
